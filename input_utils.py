@@ -4,10 +4,7 @@ import os
 import tensorflow as tf
 
 
-def _parse_function(example_proto, mode, input_shape, label_shape, batch_size):
-  input_shape = (batch_size,) + input_shape
-  label_shape = (batch_size,) + label_shape
-
+def _parse_function(example_proto, mode, input_shape, label_shape):
   keys_to_features = {'inputs': tf.io.FixedLenFeature([], tf.string)}
   if mode != tf.estimator.ModeKeys.PREDICT:
     keys_to_features['labels'] = tf.io.FixedLenFeature([], tf.string)
@@ -42,7 +39,7 @@ def _get_dataset(
       num_parallel_calls=tf.data.experimental.AUTOTUNE)
   dataset = dataset.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
   dataset = dataset.map(
-      lambda x: _parse_function(x, mode, input_shape, label_shape, batch_size),
+      lambda x: _parse_function(x, mode, input_shape, label_shape),
       num_parallel_calls=tf.data.experimental.AUTOTUNE)
   if shuffle:
     dataset = dataset.shuffle(shuffle_buffer_size)
