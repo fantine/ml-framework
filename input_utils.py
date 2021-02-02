@@ -69,18 +69,18 @@ def get_label_shape(hparams):
 
 def get_dataset(hparams, mode):
   if mode == tf.estimator.ModeKeys.TRAIN:
-    input_file = hparams.train_file
+    file_pattern = hparams.train_file
     shuffle = True
     num_epochs = hparams.num_epochs
   elif mode == tf.estimator.ModeKeys.EVAL:
-    input_file = hparams.eval_file
+    file_pattern = hparams.eval_file
     shuffle = False
     num_epochs = 1
   else:
     raise NotImplementedError('Unsupported mode {}'.format(mode))
 
   return _get_dataset(
-      filenames,
+      file_pattern,
       get_input_shape(hparams),
       get_label_shape(hparams),
       hparams.batch_size,
