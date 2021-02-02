@@ -87,16 +87,6 @@ def _parse_arguments(argv):
 
   # Training and evaluation arguments
   parser.add_argument(
-      '--train_steps',
-      help='Number of training steps.',
-      type=int,
-      default=1000)
-  parser.add_argument(
-      '--eval_steps',
-      help='Number of evaluation steps.',
-      type=int,
-      default=1000)
-  parser.add_argument(
       '--batch_size',
       help='Batch size.',
       type=int,
@@ -116,6 +106,11 @@ def _parse_arguments(argv):
       help='Input data shuffle buffer size.',
       type=int,
       default=1000)
+  parser.add_argument(
+      '--patience',
+      help='Patience.',
+      type=int,
+      default=10)
 
   # Model architecture arguments
   parser.add_argument(
