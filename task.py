@@ -151,7 +151,7 @@ def _parse_arguments(argv):
       default=0.0)
   parser.add_argument(
       '--dense_dropout',
-      help='Parameter to control the dropout rate in dense layers.'
+      help='Parameter to control the dropout rate in dense layers.',
       type=float,
       default=0.0)
   parser.add_argument(
