@@ -43,7 +43,7 @@ class BaseModel():
     with strategy.scope():
       model = self.get_model()
       model.compile(optimizer=self.get_optimizer(),
-                    loss=self.loss(), metrics=self.metrics())
+                    loss=self.get_loss(), metrics=self.get_metrics())
     model.summary()
     callbacks = [
         tf.keras.callbacks.TensorBoard(
