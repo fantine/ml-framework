@@ -3,7 +3,7 @@ import tensorflow as tf
 from trainer.model import base
 
 
-class ExampleCNN1D(base.ClassificationModel):
+class CNN1DExample(base.ClassificationModel):
 
   def get_input_shape(self):
     h = self.hparams

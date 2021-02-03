@@ -1,1 +1,1 @@
-from .cnn1d import ExampleCNN1D
+from .cnn1d import CNN1DExample
