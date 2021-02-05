@@ -107,7 +107,7 @@ def _parse_arguments(argv):
       '--shuffle_buffer_size',
       help='Input data shuffle buffer size.',
       type=int,
-      default=1000)
+      default=10000)
   parser.add_argument(
       '--patience',
       help='Patience.',
@@ -131,6 +131,12 @@ def _parse_arguments(argv):
             ' successive layers.'),
       type=int,
       default=1)
+  parser.add_argument(
+      '--filter_multiplier',
+      help=('Parameter to control the increase in number of filters in'
+            ' the dense layers.'),
+      type=int,
+      default=4)
   parser.add_argument(
       '--activation',
       help='Parameter to control the type of activation layers.',
