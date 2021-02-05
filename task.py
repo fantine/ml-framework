@@ -82,7 +82,7 @@ def _parse_arguments(argv):
       type=int,
       default=1)
   parser.add_argument(
-      '--channels_out',
+      '--out_channels',
       help='Number of output channels.',
       type=int,
       default=1)
