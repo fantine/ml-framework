@@ -1,6 +1,7 @@
 import argparse
 import logging
 import sys
+from typing import Text
 
 import tensorflow as tf
 
@@ -8,12 +9,13 @@ from trainer import input_utils
 from trainer import model
 
 
-def _get_model(model_name):
+def _get_model(model_name: Text):
+  """Gets the machine learning model corresponding to `model_name`."""
   return getattr(model, model_name)
 
 
 def _parse_arguments(argv):
-  """Parse command-line arguments."""
+  """Parses command-line arguments."""
 
   parser = argparse.ArgumentParser()
 
@@ -167,11 +169,17 @@ def _parse_arguments(argv):
   return parser.parse_args(argv)
 
 
-def _get_run_config(hparams):
+def _get_run_config(hparams) -> tf.estimator.RunConfig:
+  """Gets the TensorFlow run config as defined by `hparams`."""
   return tf.estimator.RunConfig(model_dir=hparams.job_dir)
 
 
 def run_experiment(hparams):
+  """Trains and evaluates a machine learning model as defined by `hparams`.
+
+  Args:
+      hparams: Machine learning model hyperparameters.
+  """
   train_data = input_utils.get_dataset(hparams, tf.estimator.ModeKeys.TRAIN)
   eval_data = input_utils.get_dataset(hparams, tf.estimator.ModeKeys.EVAL)
   run_config = _get_run_config(hparams)
@@ -180,7 +188,8 @@ def run_experiment(hparams):
   model_.train_and_evaluate(train_data, eval_data)
 
 
-def _set_logging(log_level):
+def _set_logging(log_level: Text):
+  """Sets the logging level to `log_level`."""
   logger = tf.get_logger()
   logger.setLevel(log_level)
   return
