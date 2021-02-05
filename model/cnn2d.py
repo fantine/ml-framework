@@ -41,7 +41,8 @@ class CNN2DModular(base.ClassificationModel):
         hparams.filter_increase_mode,
     )
 
-    regularizer = get_regularizer(hparams.regularizer, hparams.reg_weight)
+    regularizer = get_regularizer(
+        hparams.regularizer, hparams.regularizer_weight)
 
     model = keras.Sequential(keras.layers.Input(input_shape))
     for filters in layer_filters:
