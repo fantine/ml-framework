@@ -44,7 +44,7 @@ class CNN2DModular(base.ClassificationModel):
     regularizer = get_regularizer(
         hparams.regularizer, hparams.regularizer_weight)
 
-    model = keras.Sequential(keras.layers.Input(input_shape))
+    model = keras.Sequential([keras.layers.Input(input_shape)])
     for filters in layer_filters:
       model.add(keras.layers.Conv2D(
           filters, 3, padding='same', kernel_regularizer=regularizer))
