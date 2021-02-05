@@ -10,9 +10,9 @@ class CNN1DExample(base.ClassificationModel):
     return (h.height, h.channels)
 
   @staticmethod
-  def model(input_shape, hparams):
+  def create_model(input_shape, hparams):
     return tf.keras.Sequential([
-        tf.keras.layers.Input(input_shape, name='inputs'),
+        tf.keras.layers.Input(input_shape),
         tf.keras.layers.Conv1D(16, 3, padding='same'),
         tf.keras.layers.LeakyReLU(alpha=0.2),
         tf.keras.layers.Conv1D(16, 3, strides=2, padding='same'),

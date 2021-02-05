@@ -80,4 +80,4 @@ class ClassificationModel(BaseModel):
     return tf.keras.metrics.BinaryAccuracy()
 
   def get_model(self):
-    return self.model(self.get_input_shape(), self.hparams)
+    return self.create_model(self.get_input_shape(), self.hparams)
