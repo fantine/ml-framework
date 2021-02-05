@@ -1,4 +1,5 @@
 import tensorflow as tf
+from tensorflow import keras
 
 from trainer.model import base
 
@@ -11,22 +12,22 @@ class CNN1DExample(base.ClassificationModel):
 
   @staticmethod
   def create_model(input_shape, hparams):
-    return tf.keras.Sequential([
-        tf.keras.layers.Input(input_shape),
-        tf.keras.layers.Conv1D(16, 3, padding='same'),
-        tf.keras.layers.LeakyReLU(alpha=0.2),
-        tf.keras.layers.Conv1D(16, 3, strides=2, padding='same'),
-        tf.keras.layers.Conv1D(32, 3, padding='same'),
-        tf.keras.layers.LeakyReLU(alpha=0.2),
-        tf.keras.layers.Conv1D(32, 3, strides=2, padding='same'),
-        tf.keras.layers.Conv1D(64, 3, padding='same'),
-        tf.keras.layers.LeakyReLU(alpha=0.2),
-        tf.keras.layers.Conv1D(64, 3, strides=2, padding='same'),
-        tf.keras.layers.Conv1D(128, 3, padding='same'),
-        tf.keras.layers.LeakyReLU(alpha=0.2),
-        tf.keras.layers.Conv1D(128, 3, strides=2, padding='same'),
-        tf.keras.layers.Flatten(),
-        tf.keras.layers.Dense(1024),
-        tf.keras.layers.LeakyReLU(alpha=0.2),
-        tf.keras.layers.Dense(1),
+    return keras.Sequential([
+        keras.layers.Input(input_shape),
+        keras.layers.Conv1D(16, 3, padding='same'),
+        keras.layers.LeakyReLU(alpha=0.2),
+        keras.layers.Conv1D(16, 3, strides=2, padding='same'),
+        keras.layers.Conv1D(32, 3, padding='same'),
+        keras.layers.LeakyReLU(alpha=0.2),
+        keras.layers.Conv1D(32, 3, strides=2, padding='same'),
+        keras.layers.Conv1D(64, 3, padding='same'),
+        keras.layers.LeakyReLU(alpha=0.2),
+        keras.layers.Conv1D(64, 3, strides=2, padding='same'),
+        keras.layers.Conv1D(128, 3, padding='same'),
+        keras.layers.LeakyReLU(alpha=0.2),
+        keras.layers.Conv1D(128, 3, strides=2, padding='same'),
+        keras.layers.Flatten(),
+        keras.layers.Dense(1024),
+        keras.layers.LeakyReLU(alpha=0.2),
+        keras.layers.Dense(1),
     ])
