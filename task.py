@@ -89,6 +89,11 @@ def _parse_arguments(argv):
 
   # Training and evaluation arguments
   parser.add_argument(
+      '--learning_rate',
+      help='Learning rate.',
+      type=float,
+      default=0.0001)
+  parser.add_argument(
       '--batch_size',
       help='Batch size.',
       type=int,
@@ -98,11 +103,6 @@ def _parse_arguments(argv):
       help='Number of training epochs.',
       type=int,
       default=10)
-  parser.add_argument(
-      '--learning_rate',
-      help='Learning rate.',
-      type=float,
-      default=0.0001)
   parser.add_argument(
       '--shuffle_buffer_size',
       help='Input data shuffle buffer size.',
@@ -171,7 +171,7 @@ def _parse_arguments(argv):
       '--regularizer_weight',
       help='Parameter to control the regularization weight.',
       type=float,
-      default=0.0)
+      default=1e-2)
   return parser.parse_args(argv)
 
 
