@@ -67,6 +67,21 @@ def _parse_arguments(argv):
       type=int,
       default=1)
   parser.add_argument(
+      '--tfrecord_height',
+      help='Input height.',
+      type=int,
+      default=-1)
+  parser.add_argument(
+      '--tfrecord_width',
+      help='Input width.',
+      type=int,
+      default=1)
+  parser.add_argument(
+      '--tfrecord_depth',
+      help='Input depth.',
+      type=int,
+      default=1)
+  parser.add_argument(
       '--label_height',
       help='Label height.',
       type=int,

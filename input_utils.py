@@ -1,14 +1,20 @@
 import tensorflow as tf
 
+from trainer import utils
 
-def _parse_function(example_proto, mode, input_shape, label_shape):
+
+def _parse_function(example_proto, mode, input_shape, label_shape,
+                    tfrecord_shape):
   keys_to_features = {'inputs': tf.io.FixedLenFeature([], tf.string)}
   if mode != tf.estimator.ModeKeys.PREDICT:
     keys_to_features['labels'] = tf.io.FixedLenFeature([], tf.string)
 
   parsed_example = tf.io.parse_example(example_proto, keys_to_features)
   inputs = tf.io.decode_raw(parsed_example['inputs'], tf.float32)
-  inputs = tf.reshape(inputs, input_shape)
+  inputs = tf.reshape(inputs, tfrecord_shape)
+
+  if tfrecord_shape != input_shape:
+    inputs = utils.random_crop(inputs, input_shape)
 
   if mode == tf.estimator.ModeKeys.PREDICT:
     return inputs
@@ -22,6 +28,7 @@ def _get_dataset(
     file_pattern,
     input_shape,
     label_shape,
+    tfrecord_shape,
     batch_size,
     mode=tf.estimator.ModeKeys.TRAIN,
     num_epochs=1,
@@ -36,7 +43,8 @@ def _get_dataset(
       num_parallel_calls=tf.data.experimental.AUTOTUNE)
   dataset = dataset.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
   dataset = dataset.map(
-      lambda x: _parse_function(x, mode, input_shape, label_shape),
+      lambda x: _parse_function(
+          x, mode, input_shape, label_shape, tfrecord_shape),
       num_parallel_calls=tf.data.experimental.AUTOTUNE)
   if shuffle:
     dataset = dataset.shuffle(shuffle_buffer_size)
@@ -61,6 +69,17 @@ def get_label_shape(hparams):
   return (hparams.label_height, hparams.label_width, hparams.label_depth)
 
 
+def get_tfrecord_shape(hparams):
+  if hparams.tfrecord_height == -1:
+    return get_input_shape(hparams)
+  if hparams.tfrecord_depth == 1:
+    if hparams.tfrecord_width == 1:
+      return (hparams.tfrecord_height, hparams.channels)
+    return (hparams.tfrecord_height, hparams.tfrecord_width, hparams.channels)
+  return (hparams.tfrecord_height, hparams.tfrecord_width,
+          hparams.tfrecord_depth, hparams.channels)
+
+
 def get_dataset(hparams, mode):
   if mode == tf.estimator.ModeKeys.TRAIN:
     file_pattern = hparams.train_file
@@ -77,6 +96,7 @@ def get_dataset(hparams, mode):
       file_pattern,
       get_input_shape(hparams),
       get_label_shape(hparams),
+      get_tfrecord_shape(hparams),
       hparams.batch_size,
       mode=mode,
       num_epochs=num_epochs,
