@@ -56,6 +56,17 @@ class BaseModel():
     model.fit(train_data, epochs=self.hparams.num_epochs,
               validation_data=eval_data, verbose=2, callbacks=callbacks)
 
+  def evaluate(self, eval_data):
+    logging.info('Loading model from %s', self.ckpt)
+    model = tf.keras.models.load_model(self.ckpt)
+    model.compile(optimizer=self.get_optimizer(),
+                  loss=self.get_loss(), metrics=self.get_metrics())
+    metrics = model.evaluate(eval_data, verbose=2)
+    logits = model.predict(eval_data)
+    logits_file = os.path.join(self.hparams.job_dir, 'logits.npy')
+    with tf.io.gfile.GFile(logits_file, 'wb') as f:
+      np.save(f, logits)
+
 
 class ClassificationModel(BaseModel):
 
