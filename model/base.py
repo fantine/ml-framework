@@ -90,7 +90,11 @@ class ClassificationModel(BaseModel):
 
   @staticmethod
   def get_metrics():
-    return tf.keras.metrics.BinaryAccuracy()
+    return [tf.keras.metrics.BinaryAccuracy(),
+            tf.keras.metrics.AUC(),
+            tf.keras.metrics.Precision(),
+            tf.keras.metrics.Recall(),
+            ]
 
   def get_model(self):
     return self.create_model(self.get_input_shape(), self.hparams)
