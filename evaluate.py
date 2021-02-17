@@ -21,8 +21,8 @@ def _parse_arguments(argv):
 
   # I/O arguments
   parser.add_argument(
-      '--ckpt',
-      help='Directory that contains the model checkpoint.',
+      '--job_dir',
+      help='Directory to which to write model checkpoints and exports.',
       required=True)
   parser.add_argument(
       '--eval_file',
@@ -110,10 +110,79 @@ def _parse_arguments(argv):
       type=int,
       default=32)
   parser.add_argument(
+      '--num_epochs',
+      help='Number of training epochs.',
+      type=int,
+      default=10)
+  parser.add_argument(
       '--shuffle_buffer_size',
       help='Input data shuffle buffer size.',
       type=int,
       default=10000)
+  parser.add_argument(
+      '--patience',
+      help='Patience.',
+      type=int,
+      default=10)
+
+  # Model architecture arguments
+  parser.add_argument(
+      '--network_depth',
+      help='Parameter to control the number of layers in the network.',
+      type=int,
+      default=3)
+  parser.add_argument(
+      '--num_filters',
+      help='Parameter to control the number of filters in the first layer.',
+      type=int,
+      default=16)
+  parser.add_argument(
+      '--filter_increase_mode',
+      help=('Parameter to control the increase in number of filters in'
+            ' successive layers.'),
+      type=int,
+      default=1)
+  parser.add_argument(
+      '--filter_multiplier',
+      help=('Parameter to control the increase in number of filters in'
+            ' the dense layers.'),
+      type=int,
+      default=4)
+  parser.add_argument(
+      '--activation',
+      help='Parameter to control the type of activation layers.',
+      type=int,
+      default=0)
+  parser.add_argument(
+      '--downsampling',
+      help='Parameter to control the type of downsampling layers.',
+      type=int,
+      default=0)
+  parser.add_argument(
+      '--batchnorm',
+      help='Parameter to control whether or not to use batch normalization.',
+      type=int,
+      default=0)
+  parser.add_argument(
+      '--conv_dropout',
+      help='Parameter to control the dropout rate in convolutional layers.',
+      type=float,
+      default=0.0)
+  parser.add_argument(
+      '--dense_dropout',
+      help='Parameter to control the dropout rate in dense layers.',
+      type=float,
+      default=0.0)
+  parser.add_argument(
+      '--regularizer',
+      help='Parameter to control the type of regularization.',
+      type=int,
+      default=0)
+  parser.add_argument(
+      '--regularizer_weight',
+      help='Parameter to control the regularization weight.',
+      type=float,
+      default=1e-2)
   return parser.parse_args(argv)
 
 
