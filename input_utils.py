@@ -32,7 +32,6 @@ def _get_dataset(
     tfrecord_shape,
     batch_size,
     mode=tf.estimator.ModeKeys.TRAIN,
-    num_epochs=1,
     compression_type=None,
     shuffle=True,
     shuffle_buffer_size=10000
@@ -85,11 +84,9 @@ def get_dataset(hparams, mode):
   if mode == tf.estimator.ModeKeys.TRAIN:
     file_pattern = hparams.train_file
     shuffle = True
-    num_epochs = hparams.num_epochs
   elif mode == tf.estimator.ModeKeys.EVAL:
     file_pattern = hparams.eval_file
     shuffle = False
-    num_epochs = 1
   else:
     raise NotImplementedError('Unsupported mode {}'.format(mode))
 
@@ -100,7 +97,6 @@ def get_dataset(hparams, mode):
       get_tfrecord_shape(hparams),
       hparams.batch_size,
       mode=mode,
-      num_epochs=num_epochs,
       compression_type=hparams.compression_type,
       shuffle=shuffle,
       shuffle_buffer_size=hparams.shuffle_buffer_size)
@@ -109,7 +105,7 @@ def get_dataset(hparams, mode):
 def get_streaming_data(hparams):
   input_shape = get_input_shape(hparams)
   if len(input_shape) == 3:
-    _get_2d_streaming_data(hparams, input_shape)
+    return _get_2d_streaming_data(hparams, input_shape)
   raise NotImplementedError('Only 2D streaming data supported for now.')
 
 
@@ -120,7 +116,7 @@ def _get_2d_streaming_data(hparams, input_shape):
   d1 = int((1. - hparams.overlap) * w1)
   d2 = int((1. - hparams.overlap) * w2)
 
-  def _generator():
+  def generator():
     for i1 in range(0, n1 - w1 + 1, d1):
       for i2 in range(0, n2 - w2 + 1, d2):
         yield data[i1:i1 + w1, i2:i2 + w2].reshape(input_shape)
