@@ -103,3 +103,28 @@ def get_dataset(hparams, mode):
       compression_type=hparams.compression_type,
       shuffle=shuffle,
       shuffle_buffer_size=hparams.shuffle_buffer_size)
+
+
+def get_streaming_data(hparams):
+  input_shape = get_input_shape(hparams)
+  if len(input) == 3:
+    _get_2d_streaming_data(hparams, input_shape)
+  raise NotImplementedError('Only 2D streaming data supported for now.')
+
+
+def _get_2d_streaming_data(hparams, input_shape):
+  data = np.load(hparams.test_file)
+  n1, n2 = data.shape[0], data.shape[1]
+  w1, w2, _ = input_shape
+  d1 = int((1. - hparams.overlap) * w1)
+  d2 = int((1. - hparams.overlap) * w2)
+
+  def _generator():
+    for i1 in range(0, n1 - w1 + 1, d1):
+      for i2 in range(0, n2 - w2 + 1, d2):
+        yield data[i1:i1 + w1, i2:i2 + w2].reshape(input_shape)
+
+  dataset = tf.data.Dataset.from_generator(
+      generator, tf.float32, tf.TensorShape(input_shape))
+
+  return dataset.batch(hparams.batch_size)
