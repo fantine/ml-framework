@@ -5,6 +5,7 @@ import os
 import numpy as np
 import tensorflow as tf
 
+from trainer import metrics
 
 class BaseModel():
 
@@ -101,9 +102,9 @@ class ClassificationModel(BaseModel):
   @staticmethod
   def get_metrics():
     return [tf.keras.metrics.BinaryAccuracy(),
-            tf.keras.metrics.AUC(),
-            tf.keras.metrics.Precision(),
-            tf.keras.metrics.Recall(),
+            metrics.AUC(from_logits=True),
+            metrics.Precision(from_logits=True),
+            metrics.Recall(from_logits=True),
             ]
 
   def get_model(self):
