@@ -107,7 +107,7 @@ def get_dataset(hparams, mode):
 
 def get_streaming_data(hparams):
   input_shape = get_input_shape(hparams)
-  if len(input) == 3:
+  if len(input_shape) == 3:
     _get_2d_streaming_data(hparams, input_shape)
   raise NotImplementedError('Only 2D streaming data supported for now.')
 
