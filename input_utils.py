@@ -31,7 +31,6 @@ def _get_dataset(
     tfrecord_shape,
     batch_size,
     mode=tf.estimator.ModeKeys.TRAIN,
-    num_epochs=1,
     compression_type=None,
     shuffle=True,
     shuffle_buffer_size=10000
@@ -84,11 +83,9 @@ def get_dataset(hparams, mode):
   if mode == tf.estimator.ModeKeys.TRAIN:
     file_pattern = hparams.train_file
     shuffle = True
-    num_epochs = hparams.num_epochs
   elif mode == tf.estimator.ModeKeys.EVAL:
     file_pattern = hparams.eval_file
     shuffle = False
-    num_epochs = 1
   else:
     raise NotImplementedError('Unsupported mode {}'.format(mode))
 
@@ -99,7 +96,30 @@ def get_dataset(hparams, mode):
       get_tfrecord_shape(hparams),
       hparams.batch_size,
       mode=mode,
-      num_epochs=num_epochs,
       compression_type=hparams.compression_type,
       shuffle=shuffle,
       shuffle_buffer_size=hparams.shuffle_buffer_size)
+
+def get_continuous_data(hparams):
+  filename = hparams.continuous_file
+  continuous_data_list = []
+  width, channels = get_input_shape(hparams)
+  sps = 20
+  cont_width = int(sps * (3600 * 24 + 20))
+  cont_shape = (cont_width, channels)
+  window_size = 400
+  shift = window_size // 2
+
+  def sub_to_batch(sub):
+    return sub.batch(window_size, drop_remainder=True)
+
+  dataset = tf.data.TFRecordDataset(
+      filename, compression_type=hparams.compression_type)
+  dataset = dataset.map(
+      lambda x: _parse_function(
+          x, tf.estimator.ModeKeys.PREDICT, (cont_width, channels), (1,), 0))
+  dataset = dataset.flat_map(lambda x: tf.data.Dataset.from_tensor_slices(x))
+  dataset = dataset.window(window_size, shift=shift)
+  dataset = dataset.flat_map(sub_to_batch)
+  dataset = dataset.map(lambda x: tf.reshape(x, (1, window_size, channels)))
+  return dataset
