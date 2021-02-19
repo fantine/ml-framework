@@ -67,6 +67,7 @@ class BaseModel():
     model.evaluate(eval_data, verbose=2)
     logits = model.predict(eval_data)
     logits_file = os.path.join(self.hparams.job_dir, 'eval_logits.npy')
+    logging.info('Writing predictions to %s', logits_file)
     with tf.io.gfile.GFile(logits_file, 'wb') as f:
       np.save(f, logits)
 
@@ -77,8 +78,10 @@ class BaseModel():
                   loss=self.get_loss(), metrics=self.get_metrics())
     logits = model.predict(test_data)
     logits_file = os.path.join(self.hparams.job_dir, 'test_logits.npy')
+    logging.info('Writing predictions to %s', logits_file)
     with tf.io.gfile.GFile(logits_file, 'wb') as f:
       np.save(f, logits)
+
 
 
 class ClassificationModel(BaseModel):
