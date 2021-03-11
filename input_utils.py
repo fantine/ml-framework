@@ -1,3 +1,4 @@
+import numpy as np
 import tensorflow as tf
 
 from trainer import utils
@@ -100,26 +101,27 @@ def get_dataset(hparams, mode):
       shuffle=shuffle,
       shuffle_buffer_size=hparams.shuffle_buffer_size)
 
-def get_continuous_data(hparams):
-  filename = hparams.continuous_file
-  continuous_data_list = []
-  width, channels = get_input_shape(hparams)
-  sps = 20
-  cont_width = int(sps * (3600 * 24 + 20))
-  cont_shape = (cont_width, channels)
-  window_size = 400
-  shift = window_size // 2
 
-  def sub_to_batch(sub):
-    return sub.batch(window_size, drop_remainder=True)
+def get_streaming_data(hparams):
+  input_shape = get_input_shape(hparams)
+  if len(input_shape) == 3:
+    _get_2d_streaming_data(hparams, input_shape)
+  raise NotImplementedError('Only 2D streaming data supported for now.')
 
-  dataset = tf.data.TFRecordDataset(
-      filename, compression_type=hparams.compression_type)
-  dataset = dataset.map(
-      lambda x: _parse_function(
-          x, tf.estimator.ModeKeys.PREDICT, (cont_width, channels), (1,), 0))
-  dataset = dataset.flat_map(lambda x: tf.data.Dataset.from_tensor_slices(x))
-  dataset = dataset.window(window_size, shift=shift)
-  dataset = dataset.flat_map(sub_to_batch)
-  dataset = dataset.map(lambda x: tf.reshape(x, (1, window_size, channels)))
-  return dataset
+
+def _get_2d_streaming_data(hparams, input_shape):
+  data = np.load(hparams.test_file)
+  n1, n2 = data.shape[0], data.shape[1]
+  w1, w2, _ = input_shape
+  d1 = int((1. - hparams.overlap) * w1)
+  d2 = int((1. - hparams.overlap) * w2)
+
+  def _generator():
+    for i1 in range(0, n1 - w1 + 1, d1):
+      for i2 in range(0, n2 - w2 + 1, d2):
+        yield data[i1:i1 + w1, i2:i2 + w2].reshape(input_shape)
+
+  dataset = tf.data.Dataset.from_generator(
+      generator, tf.float32, tf.TensorShape(input_shape))
+
+  return dataset.batch(hparams.batch_size)
