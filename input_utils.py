@@ -105,7 +105,7 @@ def get_dataset(hparams, mode):
 def get_streaming_data(hparams):
   input_shape = get_input_shape(hparams)
   if len(input_shape) == 3:
-    _get_2d_streaming_data(hparams, input_shape)
+    return _get_2d_streaming_data(hparams, input_shape)
   raise NotImplementedError('Only 2D streaming data supported for now.')
 
 
@@ -116,7 +116,7 @@ def _get_2d_streaming_data(hparams, input_shape):
   d1 = int((1. - hparams.overlap) * w1)
   d2 = int((1. - hparams.overlap) * w2)
 
-  def _generator():
+  def generator():
     for i1 in range(0, n1 - w1 + 1, d1):
       for i2 in range(0, n2 - w2 + 1, d2):
         yield data[i1:i1 + w1, i2:i2 + w2].reshape(input_shape)
