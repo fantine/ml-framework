@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 
-from trainer import utils
+from ml_framework import utils
 
 
 def _parse_function(example_proto, mode, input_shape, label_shape,

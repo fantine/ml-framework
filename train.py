@@ -5,8 +5,8 @@ from typing import Text
 
 import tensorflow as tf
 
-from trainer import input_utils
-from trainer import model
+from ml_framework import input_utils
+from ml_framework import model
 
 
 def _get_model(model_name: Text):
