@@ -6,23 +6,22 @@ from ml_framework import utils
 
 def _parse_function(example_proto, mode, input_shape, label_shape,
                     tfrecord_shape):
-  tf.io.FixedLenFeature(shape=tfrecord_shape, dtype=tf.float32)
-  # features = tf.io.parse_single_example(example_proto, features_dict)
-
-  features_dict = {'inputs': tf.io.FixedLenFeature(
-      shape=tfrecord_shape, dtype=tf.float32)}
+  features_dict = {'inputs': tf.io.FixedLenFeature([], tf.string), }
   if mode != tf.estimator.ModeKeys.PREDICT:
-    features_dict['labels'] = tf.io.FixedLenFeature(
-        shape=label_shape, dtype=tf.float32)
+    features_dict['labels'] = tf.io.FixedLenFeature([], tf.string)
   parsed_example = tf.io.parse_single_example(example_proto, features_dict)
 
-  inputs = parsed_example.get('inputs')
+  inputs = tf.io.decode_raw(parsed_example['inputs'], tf.float32)
+  inputs = tf.reshape(inputs, tfrecord_shape)
   if tfrecord_shape != input_shape:
     inputs = utils.random_crop(inputs, input_shape)
 
   if mode == tf.estimator.ModeKeys.PREDICT:
     return inputs
-  return inputs, parsed_example.get('labels')
+
+  labels = tf.io.decode_raw(parsed_example['labels'], tf.float32)
+  labels = tf.reshape(labels, label_shape)
+  return inputs, labels
 
 
 def _get_dataset(
