@@ -6,23 +6,23 @@ from ml_framework import utils
 
 def _parse_function(example_proto, mode, input_shape, label_shape,
                     tfrecord_shape):
-  keys_to_features = {'inputs': tf.io.FixedLenFeature([], tf.string)}
+  tf.io.FixedLenFeature(shape=tfrecord_shape, dtype=tf.float32)
+  # features = tf.io.parse_single_example(example_proto, features_dict)
+
+  features_dict = {'inputs': tf.io.FixedLenFeature(
+      shape=tfrecord_shape, dtype=tf.float32)}
   if mode != tf.estimator.ModeKeys.PREDICT:
-    keys_to_features['labels'] = tf.io.FixedLenFeature([], tf.string)
+    features_dict['labels'] = tf.io.FixedLenFeature(
+        shape=label_shape, dtype=tf.float32)
+  parsed_example = tf.io.parse_single_example(example_proto, features_dict)
 
-  parsed_example = tf.io.parse_example(example_proto, keys_to_features)
-  inputs = tf.io.decode_raw(parsed_example['inputs'], tf.float32)
-  inputs = tf.reshape(inputs, tfrecord_shape)
-
+  inputs = parsed_example.get('inputs')
   if tfrecord_shape != input_shape:
     inputs = utils.random_crop(inputs, input_shape)
 
   if mode == tf.estimator.ModeKeys.PREDICT:
     return inputs
-
-  labels = tf.io.decode_raw(parsed_example['labels'], tf.float32)
-  labels = tf.reshape(labels, label_shape)
-  return inputs, labels
+  return inputs, parsed_example.get('labels')
 
 
 def _get_dataset(
@@ -84,9 +84,11 @@ def get_dataset(hparams, mode):
   if mode == tf.estimator.ModeKeys.TRAIN:
     file_pattern = hparams.train_file
     shuffle = True
+    shuffle_buffer_size = hparams.shuffle_buffer_size
   elif mode == tf.estimator.ModeKeys.EVAL:
     file_pattern = hparams.eval_file
     shuffle = False
+    shuffle_buffer_size = 0
   else:
     raise NotImplementedError('Unsupported mode {}'.format(mode))
 
@@ -99,7 +101,7 @@ def get_dataset(hparams, mode):
       mode=mode,
       compression_type=hparams.compression_type,
       shuffle=shuffle,
-      shuffle_buffer_size=hparams.shuffle_buffer_size)
+      shuffle_buffer_size=shuffle_buffer_size)
 
 
 def get_streaming_data(hparams):
