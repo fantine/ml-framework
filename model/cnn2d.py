@@ -1,4 +1,3 @@
-import tensorflow as tf
 from tensorflow import keras
 
 from ml_framework.model import base

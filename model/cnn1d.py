@@ -1,7 +1,6 @@
-import tensorflow as tf
 from tensorflow import keras
 
-from trainer.model import base
+from ml_framework.model import base
 
 
 class CNN1DExample(base.ClassificationModel):

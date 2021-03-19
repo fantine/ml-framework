@@ -5,7 +5,8 @@ import os
 import numpy as np
 import tensorflow as tf
 
-from trainer import metrics
+from ml_framework import metrics
+
 
 class BaseModel():
 
@@ -83,7 +84,6 @@ class BaseModel():
       np.save(f, logits)
 
 
-
 class ClassificationModel(BaseModel):
 
   @abc.abstractmethod
@@ -92,7 +92,7 @@ class ClassificationModel(BaseModel):
 
   @staticmethod
   @abc.abstractmethod
-  def model(input_shape, hparams):
+  def create_model(input_shape, hparams):
     raise NotImplementedError
 
   def get_optimizer(self):
