@@ -14,7 +14,7 @@ def _get_model(model_name: Text):
   return getattr(model, model_name)
 
 
-def _parse_arguments(argv):
+def _parse_known_arguments(argv):
   """Parses command-line arguments."""
 
   parser = argparse.ArgumentParser()
@@ -187,7 +187,7 @@ def _parse_arguments(argv):
       help='Parameter to control the regularization weight.',
       type=float,
       default=1e-2)
-  return parser.parse_args(argv)
+  return parser.parse_known_args(argv)
 
 
 def _get_run_config(hparams) -> tf.estimator.RunConfig:
@@ -218,7 +218,7 @@ def _set_logging(log_level: Text):
 
 def main():
   """Runs the experiment."""
-  hparams = _parse_arguments(sys.argv[1:])
+  hparams, _ = _parse_known_arguments(sys.argv[1:])
   _set_logging(hparams.log_level.upper())
   run_experiment(hparams)
 
