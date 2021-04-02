@@ -1,6 +1,7 @@
 from tensorflow import keras
 
 from ml_framework.model import base
+from ml_framework.model import utils
 
 
 class CNN2DModular(base.ClassificationModel):
@@ -11,13 +12,13 @@ class CNN2DModular(base.ClassificationModel):
 
   @staticmethod
   def create_model(input_shape, hparams):
-    layer_filters = get_model_layers(
+    layer_filters = utils.get_model_layers(
         hparams.network_depth,
         hparams.num_filters,
         hparams.filter_increase_mode,
     )
 
-    regularizer = get_regularizer(
+    regularizer = utils.get_regularizer(
         hparams.regularizer, hparams.regularizer_weight)
 
     model = keras.Sequential([keras.layers.Input(input_shape)])
@@ -57,24 +58,3 @@ class CNN2DModular(base.ClassificationModel):
 
     model.add(keras.layers.Dense(hparams.out_channels))
     return model
-
-
-def get_model_layers(depth, num_filters=16, increase_mode=1):
-  if increase_mode == 1:  # Linear increase
-    layers = [int(num_filters * (1 + i)) for i in range(depth)]
-  if increase_mode == 2:  # Doubling every other block
-    layers = [int(num_filters * 2**(i // 2)) for i in range(depth)]
-  if increase_mode == 3:  # Doubling every block
-    layers = [int(num_filters * 2**(i)) for i in range(depth)]
-    if depth > 1:
-      layers[-1] //= 2
-  return layers
-
-
-def get_regularizer(regularizer=0, reg_weight=1e-4):
-  if regularizer == 0:
-    return None
-  if regularizer == 1:
-    return keras.regularizers.l1(reg_weight)
-  if regularizer == 2:
-    return keras.regularizers.l2(reg_weight)
