@@ -3,34 +3,11 @@ from tensorflow import keras
 from ml_framework.model import base
 
 
-class CNN2DExample(base.ClassificationModel):
+class CNN1DModular(base.ClassificationModel):
 
   def get_input_shape(self):
     h = self.hparams
-    return (h.height, h.width, h.channels)
-
-  @staticmethod
-  def create_model(input_shape, hparams):
-    return keras.Sequential([
-        keras.layers.Input(input_shape, name='inputs'),
-        keras.layers.Conv2D(16, 3, padding='same', activation='relu'),
-        keras.layers.MaxPooling2D(),
-        keras.layers.Conv2D(32, 3, padding='same', activation='relu'),
-        keras.layers.MaxPooling2D(),
-        keras.layers.Conv2D(64, 3, padding='same', activation='relu'),
-        keras.layers.MaxPooling2D(),
-        keras.layers.Flatten(),
-        keras.layers.Dense(1024),
-        keras.layers.Dense(512, activation='relu'),
-        keras.layers.Dense(1)
-    ])
-
-
-class CNN2DModular(base.ClassificationModel):
-
-  def get_input_shape(self):
-    h = self.hparams
-    return (h.height, h.width, h.channels)
+    return (h.height, h.channels)
 
   @staticmethod
   def create_model(input_shape, hparams):
@@ -45,7 +22,7 @@ class CNN2DModular(base.ClassificationModel):
 
     model = keras.Sequential([keras.layers.Input(input_shape)])
     for filters in layer_filters:
-      model.add(keras.layers.Conv2D(
+      model.add(keras.layers.Conv1D(
           filters, 3, padding='same', kernel_regularizer=regularizer))
       if hparams.batchnorm == 1:
         model.add(keras.layers.BatchNormalization())
@@ -58,9 +35,9 @@ class CNN2DModular(base.ClassificationModel):
       if hparams.conv_dropout > 0:
         model.add(keras.layers.Dropout(hparams.conv_dropout))
       if hparams.downsampling == 0:  # MaxPool
-        model.add(keras.layers.MaxPooling2D(2, padding='same'))
+        model.add(keras.layers.MaxPooling1D(2, padding='same'))
       elif hparams.downsampling == 1:  # Convolution downsample
-        model.add(keras.layers.Conv2D(
+        model.add(keras.layers.Conv1D(
             filters, 3, strides=2, padding='same',
             kernel_regularizer=regularizer))
       else:
