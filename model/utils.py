@@ -47,7 +47,7 @@ def residual_block_1d(inputs, filters, strides, regularizer, batchnorm):
         strides=1,
         padding='same',
         use_bias=False,
-        regularizer=regularizer)(x)
+        kernel_regularizer=regularizer)(x)
   else:
     x = keras.layers.MaxPooling1D(pool_size=2, strides=strides[0])(x)
 
@@ -60,7 +60,7 @@ def residual_block_1d(inputs, filters, strides, regularizer, batchnorm):
       strides=strides[1],
       padding='same',
       use_bias=False,
-      regularizer=regularizer)(x)
+      kernel_regularizer=regularizer)(x)
   # Construct the residual link that bypasses this block.
   shortcut = keras.layers.Conv1D(
       filters=filters[1],
@@ -68,7 +68,7 @@ def residual_block_1d(inputs, filters, strides, regularizer, batchnorm):
       strides=strides[0],
       padding='same',
       use_bias=False,
-      regularizer=regularizer)(inputs)
+      kernel_regularizer=regularizer)(inputs)
   if batchnorm == 1:
     shortcut = keras.layers.BatchNormalization()(shortcut)
 
@@ -100,7 +100,7 @@ def residual_block_2d(inputs, filters, strides, regularizer, batchnorm):
         strides=1,
         padding='same',
         use_bias=False,
-        regularizer=regularizer)(x)
+        kernel_regularizer=regularizer)(x)
   else:
     x = keras.layers.MaxPooling2D(pool_size=2, strides=strides[0])(x)
 
@@ -113,7 +113,7 @@ def residual_block_2d(inputs, filters, strides, regularizer, batchnorm):
       strides=strides[1],
       padding='same',
       use_bias=False,
-      regularizer=regularizer)(x)
+      kernel_regularizer=regularizer)(x)
   # Construct the residual link that bypasses this block.
   shortcut = keras.layers.Conv2D(
       filters=filters[1],
@@ -121,7 +121,7 @@ def residual_block_2d(inputs, filters, strides, regularizer, batchnorm):
       strides=strides[0],
       padding='same',
       use_bias=False,
-      regularizer=regularizer)(inputs)
+      kernel_regularizer=regularizer)(inputs)
   if batchnorm == 1:
     shortcut = keras.layers.BatchNormalization()(shortcut)
 

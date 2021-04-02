@@ -46,22 +46,23 @@ def residual_encoder(inputs, layer_filters, regularizer, batchnorm):
   """
   x = keras.layers.Conv1D(
       filters=layer_filters[0], kernel_size=3, padding='same', use_bias=False,
-      regularizer=regularizer)(inputs)
+      kernel_regularizer=regularizer)(inputs)
   if batchnorm == 1:
     x = keras.layers.BatchNormalization()(x)
   x = keras.layers.LeakyReLU()(x)
   x = keras.layers.Conv1D(
       filters=layer_filters[0], kernel_size=3, padding='same', use_bias=False,
-      regularizer=regularizer)(x)
+      kernel_regularizer=regularizer)(x)
 
   shortcut = keras.layers.Conv1D(
       filters=layer_filters[0], kernel_size=1, padding='same', use_bias=False,
-      regularizer=regularizer)(inputs)
+      kernel_regularizer=regularizer)(inputs)
   if batchnorm == 1:
     shortcut = keras.layers.BatchNormalization()(shortcut)
   x = shortcut + x
 
   for filters in layer_filters[1:]:
-    x = utils.residual_block_1d(x, filters=[filters, filters], strides=[2, 1],
-                                regularizer=regularizer, batchnorm=batchnorm)
+    x = utils.residual_block_1d(
+        x, filters=[filters, filters], strides=[2, 1],
+        regularizer=regularizer, batchnorm=batchnorm)
   return x
