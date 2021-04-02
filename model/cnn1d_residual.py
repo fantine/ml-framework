@@ -22,28 +22,24 @@ class CNN1DResidual(base.ClassificationModel):
         hparams.regularizer, hparams.regularizer_weight)
 
     inputs = keras.Input(shape=input_shape)
-    x = residual_encoder(inputs, layer_filters, regularizer)
+    x = residual_encoder(inputs, layer_filters, regularizer, hparams.batchnorm)
     x = keras.layers.Flatten()(x)
     x = keras.layers.Dense(hparams.filter_multiplier * layer_filters[-1])(x)
     if hparams.dense_dropout > 0:
       x = keras.layers.Dropout(hparams.dense_dropout)(x)
-    if hparams.activation == 0:
-      x = keras.layers.ReLU()(x)
-    elif hparams.activation == 1:
-      x = keras.layers.LeakyReLU()(x)
-    else:
-      raise NotImplementedError('Unsupported activation layer type.')
+    x = keras.layers.LeakyReLU()(x)
     x = keras.layers.Dense(hparams.out_channels)(x)
     return keras.Model(inputs=inputs, outputs=x)
 
 
-def residual_encoder(inputs, layer_filters, regularizer):
+def residual_encoder(inputs, layer_filters, regularizer, batchnorm):
   """Performs a series of downsamples to the input.
 
   Args:
     inputs: Input to the encoder.
     layer_filters: List of filters for successive layers.
     regularizer: Regularizer.
+    batchnorm: Whether or not to use batch normalization.
 
   Returns:
     Output of the residual encoder.
@@ -51,7 +47,8 @@ def residual_encoder(inputs, layer_filters, regularizer):
   x = keras.layers.Conv1D(
       filters=layer_filters[0], kernel_size=3, padding='same', use_bias=False,
       regularizer=regularizer)(inputs)
-  x = keras.layers.BatchNormalization()(x)
+  if batchnorm == 1:
+    x = keras.layers.BatchNormalization()(x)
   x = keras.layers.LeakyReLU()(x)
   x = keras.layers.Conv1D(
       filters=layer_filters[0], kernel_size=3, padding='same', use_bias=False,
@@ -60,10 +57,11 @@ def residual_encoder(inputs, layer_filters, regularizer):
   shortcut = keras.layers.Conv1D(
       filters=layer_filters[0], kernel_size=1, padding='same', use_bias=False,
       regularizer=regularizer)(inputs)
-  shortcut = keras.layers.BatchNormalization()(shortcut)
+  if batchnorm == 1:
+    shortcut = keras.layers.BatchNormalization()(shortcut)
   x = shortcut + x
 
   for filters in layer_filters[1:]:
     x = utils.residual_block_1d(x, filters=[filters, filters], strides=[2, 1],
-                                regularizer=regularizer)
+                                regularizer=regularizer, batchnorm=batchnorm)
   return x

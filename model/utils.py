@@ -22,7 +22,7 @@ def get_regularizer(regularizer=0, reg_weight=1e-4):
     return keras.regularizers.l2(reg_weight)
 
 
-def residual_block_1d(inputs, filters, strides, regularizer):
+def residual_block_1d(inputs, filters, strides, regularizer, batchnorm):
   """Creates 1D convolution layer block with residual connections.
 
   Args:
@@ -30,11 +30,15 @@ def residual_block_1d(inputs, filters, strides, regularizer):
     filters: List of filters to use in successive layers.
     strides: List of strides to use in successive layers.
     regularizer: Regularizer.
+    batchnorm: Whether or not to use batch normalization.
 
   Returns:
     Output of the residual block.
   """
-  x = keras.layers.BatchNormalization()(inputs)
+  if batchnorm == 1:
+    x = keras.layers.BatchNormalization()(inputs)
+  else:
+    x = inputs
   x = keras.layers.LeakyReLU()(x)
   if strides[0] == 1:
     x = keras.layers.Conv1D(
@@ -47,7 +51,8 @@ def residual_block_1d(inputs, filters, strides, regularizer):
   else:
     x = keras.layers.MaxPooling1D(pool_size=2, strides=strides[0])(x)
 
-  x = keras.layers.BatchNormalization()(x)
+  if batchnorm == 1:
+    x = keras.layers.BatchNormalization()(x)
   x = keras.layers.LeakyReLU()(x)
   x = keras.layers.Conv1D(
       filters=filters[1],
@@ -61,15 +66,16 @@ def residual_block_1d(inputs, filters, strides, regularizer):
       filters=filters[1],
       kernel_size=1,
       strides=strides[0],
-      padding='same'
+      padding='same',
       use_bias=False,
       regularizer=regularizer)(inputs)
-  shortcut = keras.layers.BatchNormalization()(shortcut)
+  if batchnorm == 1:
+    shortcut = keras.layers.BatchNormalization()(shortcut)
 
   return shortcut + x
 
 
-def residual_block_2d(inputs, filters, strides, regularizer):
+def residual_block_2d(inputs, filters, strides, regularizer, batchnorm):
   """Creates 2D convolution layer block with residual connections.
 
   Args:
@@ -77,11 +83,15 @@ def residual_block_2d(inputs, filters, strides, regularizer):
     filters: List of filters to use in successive layers.
     strides: List of strides to use in successive layers.
     regularizer: Regularizer.
+    batchnorm: Whether or not to use batch normalization.
 
   Returns:
     Output of the residual block.
   """
-  x = keras.layers.BatchNormalization()(inputs)
+  if batchnorm == 1:
+    x = keras.layers.BatchNormalization()(inputs)
+  else:
+    x = inputs
   x = keras.layers.LeakyReLU()(x)
   if strides[0] == 1:
     x = keras.layers.Conv2D(
@@ -94,7 +104,8 @@ def residual_block_2d(inputs, filters, strides, regularizer):
   else:
     x = keras.layers.MaxPooling2D(pool_size=2, strides=strides[0])(x)
 
-  x = keras.layers.BatchNormalization()(x)
+  if batchnorm == 1:
+    x = keras.layers.BatchNormalization()(x)
   x = keras.layers.LeakyReLU()(x)
   x = keras.layers.Conv2D(
       filters=filters[1],
@@ -108,9 +119,10 @@ def residual_block_2d(inputs, filters, strides, regularizer):
       filters=filters[1],
       kernel_size=1,
       strides=strides[0],
-      padding='same'
+      padding='same',
       use_bias=False,
       regularizer=regularizer)(inputs)
-  shortcut = keras.layers.BatchNormalization()(shortcut)
+  if batchnorm == 1:
+    shortcut = keras.layers.BatchNormalization()(shortcut)
 
   return shortcut + x
