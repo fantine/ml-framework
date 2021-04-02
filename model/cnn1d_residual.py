@@ -8,7 +8,7 @@ class CNN1DResidual(base.ClassificationModel):
 
   def get_input_shape(self):
     h = self.hparams
-    return (h.height, h.width, h.channels)
+    return (h.height, h.channels)
 
   @staticmethod
   def create_model(input_shape, hparams):
