@@ -105,9 +105,30 @@ def get_dataset(hparams, mode):
 
 def get_streaming_data(hparams):
   input_shape = get_input_shape(hparams)
+  if len(input_shape) == 2:
+    return _get_1d_streaming_data(hparams, input_shape)
   if len(input_shape) == 3:
     return _get_2d_streaming_data(hparams, input_shape)
-  raise NotImplementedError('Only 2D streaming data supported for now.')
+  if len(input_shape) == 4:
+    return _get_3d_streaming_data(hparams, input_shape)
+  raise NotImplementedError(
+      'Unsupported input data shape: {}.'.format(input_shape))
+
+
+def _get_1d_streaming_data(hparams, input_shape):
+  data = np.load(hparams.test_file)
+  n = data.shape[0]
+  w = input_shape[0]
+  d = int((1. - hparams.overlap) * w)
+
+  def generator():
+    for i in range(0, n - w + 1, d):
+      yield data[i:i + w].reshape(input_shape)
+
+  dataset = tf.data.Dataset.from_generator(
+      generator, tf.float32, tf.TensorShape(input_shape))
+
+  return dataset.batch(hparams.batch_size)
 
 
 def _get_2d_streaming_data(hparams, input_shape):
@@ -121,6 +142,26 @@ def _get_2d_streaming_data(hparams, input_shape):
     for i1 in range(0, n1 - w1 + 1, d1):
       for i2 in range(0, n2 - w2 + 1, d2):
         yield data[i1:i1 + w1, i2:i2 + w2].reshape(input_shape)
+
+  dataset = tf.data.Dataset.from_generator(
+      generator, tf.float32, tf.TensorShape(input_shape))
+
+  return dataset.batch(hparams.batch_size)
+
+
+def _get_3d_streaming_data(hparams, input_shape):
+  data = np.load(hparams.test_file)
+  n1, n2, n3 = data.shape[0], data.shape[1], data.shape[2]
+  w1, w2, w3, _ = input_shape
+  d1 = int((1. - hparams.overlap) * w1)
+  d2 = int((1. - hparams.overlap) * w2)
+  d3 = int((1. - hparams.overlap) * w3)
+
+  def generator():
+    for i1 in range(0, n1 - w1 + 1, d1):
+      for i2 in range(0, n2 - w2 + 1, d2):
+        for i3 in range(0, n3 - w3 + 1, d3):
+          yield data[i1:i1 + w1, i2:i2 + w2, i3:i3 + w3].reshape(input_shape)
 
   dataset = tf.data.Dataset.from_generator(
       generator, tf.float32, tf.TensorShape(input_shape))
