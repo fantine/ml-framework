@@ -152,7 +152,7 @@ def _get_2d_streaming_data(hparams, input_shape):
         generator, tf.float32, tf.TensorShape(input_shape))
 
     datasets.append(
-        os.path.splitext(filename)[0], dataset.batch(hparams.batch_size))
+        (os.path.splitext(filename)[0], dataset.batch(hparams.batch_size)))
   return datasets
 
 
