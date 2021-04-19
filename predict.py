@@ -88,11 +88,11 @@ def run_experiment(hparams):
   Args:
       hparams: Machine learning model hyperparameters.
   """
-  test_data = input_utils.get_streaming_data(hparams)
+  test_datasets = input_utils.get_streaming_data(hparams)
   run_config = _get_run_config(hparams)
   model_ = _get_model(hparams.model)(hparams, run_config)
   logging.info('Running model: %s', hparams.model)
-  model_.predict(test_data)
+  model_.predict(test_datasets)
 
 
 def _set_logging(log_level: Text):
