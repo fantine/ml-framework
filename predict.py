@@ -23,6 +23,7 @@ def _parse_known_arguments(argv):
   parser.add_argument(
       '--overlap',
       help='Overlap.',
+      type=float,
       default=0.5)
   parser.add_argument(
       '--job_dir',
