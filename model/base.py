@@ -72,16 +72,17 @@ class BaseModel():
     with tf.io.gfile.GFile(logits_file, 'wb') as f:
       np.save(f, logits)
 
-  def predict(self, test_data):
+  def predict(self, test_datasets):
     logging.info('Loading model from %s', self.hparams.job_dir)
     model = tf.keras.models.load_model(self.hparams.job_dir)
     model.compile(optimizer=self.get_optimizer(),
                   loss=self.get_loss(), metrics=self.get_metrics())
-    logits = model.predict(test_data)
-    logits_file = os.path.join(self.hparams.job_dir, 'test_logits.npy')
-    logging.info('Writing predictions to %s', logits_file)
-    with tf.io.gfile.GFile(logits_file, 'wb') as f:
-      np.save(f, logits)
+    for key, test_dataset in test_datasets:
+      logits = model.predict(test_dataset)
+      logits_file = '{}_logits.npy'.format(key)
+      logging.info('Writing logits to %s', logits_file)
+      with tf.io.gfile.GFile(logits_file, 'wb') as f:
+        np.save(f, logits)
 
 
 class ClassificationModel(BaseModel):
