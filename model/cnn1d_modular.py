@@ -55,6 +55,14 @@ class CNN1DModular(base.ClassificationModel):
       model.add(keras.layers.LeakyReLU())
     else:
       raise NotImplementedError('Unsupported activation layer type.')
+    model.add(keras.layers.Dense(
+        hparams.filter_multiplier * layer_filters[-1]))
+    if hparams.activation == 0:
+      model.add(keras.layers.ReLU())
+    elif hparams.activation == 1:
+      model.add(keras.layers.LeakyReLU())
+    else:
+      raise NotImplementedError('Unsupported activation layer type.')
 
     model.add(keras.layers.Dense(hparams.out_channels))
     return model

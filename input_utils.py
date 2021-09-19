@@ -15,12 +15,15 @@ def _parse_function(example_proto, mode, input_shape, label_shape,
 
   inputs = tf.io.decode_raw(parsed_example['inputs'], tf.float32)
   inputs = tf.reshape(inputs, tfrecord_shape)
-
-  if tfrecord_shape != input_shape:
-    if tf.estimator.ModeKeys.TRAIN:
+ 
+ if tfrecord_shape != input_shape:
+    if mode != tf.estimator.ModeKeys.PREDICT:
       inputs = utils.random_crop(inputs, input_shape)
     else:
       inputs = utils.central_crop(inputs, input_shape)
+
+  if mode == tf.estimator.ModeKeys.PREDICT:
+    return inputs
 
   labels = tf.io.decode_raw(parsed_example['labels'], tf.float32)
   labels = tf.reshape(labels, label_shape)
@@ -118,20 +121,43 @@ def get_streaming_data(hparams):
       'Unsupported input data shape: {}.'.format(input_shape))
 
 
-def _get_1d_streaming_data(hparams, input_shape):
-  data = np.load(hparams.test_file)
-  n = data.shape[0]
-  w = input_shape[0]
-  d = int((1. - hparams.overlap) * w)
+def get_1d_generator(data, input_shape, overlap):
+  n1 = data.shape[0]
+  w1, _ = input_shape
+  d1 = int((1. - overlap) * w1)
 
   def generator():
-    for i in range(0, n - w + 1, d):
-      yield data[i:i + w].reshape(input_shape)
+    for i1 in range(0, n1 - w1 + 1, d1):
+      yield data[i1:i1 + w1].reshape(input_shape)
+  return generator
 
-  dataset = tf.data.Dataset.from_generator(
-      generator, tf.float32, tf.TensorShape(input_shape))
 
-  return dataset.batch(hparams.batch_size)
+def _get_1d_streaming_data(hparams, input_shape):
+  datasets = []
+  filenames = tf.io.gfile.glob(hparams.test_file)
+  for filename in filenames:
+    data = np.load(filename)
+
+    dataset = tf.data.Dataset.from_generator(
+        get_1d_generator(data, input_shape, hparams.overlap),
+        tf.float32, tf.TensorShape(input_shape))
+
+    datasets.append(
+        (os.path.splitext(filename)[0], dataset.batch(hparams.batch_size)))
+  return datasets
+
+
+def get_2d_generator(data, input_shape, overlap):
+  n1, n2 = data.shape[0], data.shape[1]
+  w1, w2, _ = input_shape
+  d1 = int((1. - overlap) * w1)
+  d2 = int((1. - overlap) * w2)
+
+  def generator():
+    for i1 in range(0, n1 - w1 + 1, d1):
+      for i2 in range(0, n2 - w2 + 1, d2):
+        yield data[i1:i1 + w1, i2:i2 + w2].reshape(input_shape)
+  return generator
 
 
 def _get_2d_streaming_data(hparams, input_shape):
@@ -139,18 +165,10 @@ def _get_2d_streaming_data(hparams, input_shape):
   filenames = tf.io.gfile.glob(hparams.test_file)
   for filename in filenames:
     data = np.load(filename)
-    n1, n2 = data.shape[0], data.shape[1]
-    w1, w2, _ = input_shape
-    d1 = int((1. - hparams.overlap) * w1)
-    d2 = int((1. - hparams.overlap) * w2)
-
-    def generator():
-      for i1 in range(0, n1 - w1 + 1, d1):
-        for i2 in range(0, n2 - w2 + 1, d2):
-          yield data[i1:i1 + w1, i2:i2 + w2].reshape(input_shape)
 
     dataset = tf.data.Dataset.from_generator(
-        generator, tf.float32, tf.TensorShape(input_shape))
+        get_2d_generator(data, input_shape, hparams.overlap),
+        tf.float32, tf.TensorShape(input_shape))
 
     datasets.append(
         (os.path.splitext(filename)[0], dataset.batch(hparams.batch_size)))
