@@ -58,7 +58,8 @@ class BaseModel():
         tf.keras.callbacks.EarlyStopping(patience=self.hparams.patience),
     ]
     model.fit(train_data, epochs=self.hparams.num_epochs,
-              validation_data=eval_data, verbose=2, callbacks=callbacks)
+              validation_data=eval_data, verbose=2, callbacks=callbacks,
+              class_weight={0: 1., 1:self.hparams.pos_weight})
 
   def evaluate(self, eval_data):
     logging.info('Loading model from %s', self.hparams.job_dir)

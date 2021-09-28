@@ -16,7 +16,7 @@ def _parse_function(example_proto, mode, input_shape, label_shape,
   inputs = tf.io.decode_raw(parsed_example['inputs'], tf.float32)
   inputs = tf.reshape(inputs, tfrecord_shape)
  
- if tfrecord_shape != input_shape:
+  if tfrecord_shape != input_shape:
     if mode != tf.estimator.ModeKeys.PREDICT:
       inputs = utils.random_crop(inputs, input_shape)
     else:

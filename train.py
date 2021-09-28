@@ -128,6 +128,11 @@ def _parse_known_arguments(argv):
       help='Patience.',
       type=int,
       default=10)
+  parser.add_argument(
+      '--pos_weight',
+      help='Positive class weight.',
+      type=float,
+      default=1.)
 
   # Model architecture arguments
   parser.add_argument(
